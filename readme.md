@@ -206,7 +206,7 @@ In summary:
 
 > **Note:** This is not something you have to actively think or worry about, since again, if you haven't narrowed down the subcommand, TypeScript will just give you an error or if there is no subcommand you wouldn't attempt narrowing.
 >
-> Additionally, the Discord API does not allow subcommands and options of basic type as siblings, so that makes things quite a bit easier. When you define the list of your `commands` as shown earlier, you will also get errors at compile time since if you input data of the wrong type or structure.
+> Additionally, the Discord API does not allow subcommands and options of basic type as siblings, so that makes things quite a bit easier. When you define the list of your `commands` as shown earlier, you will also get errors at compile time if you input data of the wrong type or structure.
 
 ### Option types and values
 
