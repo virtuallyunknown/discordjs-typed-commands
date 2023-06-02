@@ -71,6 +71,8 @@ discord.on(Events.InteractionCreate, async interaction => {
 });
 ```
 
+Also check out [the example directory](/example/).
+
 ## Details
 
 The examples demonstrated below will assume you have a command list (`commands`) with the following structure:
@@ -94,6 +96,8 @@ s = subcommand | o = option | c = choice
 ```
 
 Defined like this:
+
+**Important:** Do not copy paste commands from the code below as they are shortened for brevity. Full working demo is available at the [example directory](/example/commands/_commands.ts) if you need one.
 
 ```ts
 /*
