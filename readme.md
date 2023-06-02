@@ -11,8 +11,9 @@ Implements a type system that provides type-safety, intellisense and autocomplet
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
   - [Narrowing the interaction type](#narrowing-the-interaction-type)
-  - [Accessing interaction options](#accessing-interaction-optionss)
+  - [Accessing interaction options](#accessing-interaction-options)
   - [Commands vs subcommands](#commands-vs-subcommands)
+  - [Option types and values](#option-types-and-values)
   - [Use a specific command as function parameter](#use-a-specific-command-as-function-parameter)
   - [Use a specific subcommand as function parameter](#use-a-specific-subcommand-as-function-parameter)
   - [Defining command list as a type](#defining-command-list-as-a-type)
@@ -53,7 +54,10 @@ Import `isTyped` anywhere you need it (usually where your Discord client is expe
 
 ```ts
 /* app.ts */
-import { isTyped } from './commands/_commands_.js';
+import { Client, Events } from 'discord.js';
+import { isTyped } from './commands/_commands.js';
+
+const discord = new Client({ intents: [ /* ... */] });
 
 discord.on(Events.InteractionCreate, async interaction => {
     if (isTyped.command(interaction, 'play')) {
@@ -124,8 +128,6 @@ Similarly, there is way to check for subcommands, but more on that later.
 In order to access the interaction options, narrow down the interaction type just as demonstrated in the previous section, then you can start accessing them via the `interaction.options.get` method.
 
 ```ts
-import { isTyped } from './commands/_commands_.js';
-
 discord.on(Events.InteractionCreate, async interaction => {
     if (isTyped.command(interaction, 'greet')) {
         /* User object */
@@ -197,8 +199,6 @@ discord.on(Events.InteractionCreate, async interaction => {
 });
 ```
 
-
-
 In summary:
 
 - If the command has any subcommands, narrow down which subcommand the `interaction` has.
@@ -207,6 +207,59 @@ In summary:
 > **Note:** This is not something you have to actively think or worry about, since again, if you haven't narrowed down the subcommand, TypeScript will just give you an error or if there is no subcommand you wouldn't attempt narrowing.
 >
 > Additionally, the Discord API does not allow subcommands and options of basic type as siblings, so that makes things quite a bit easier. When you define the list of your `commands` as shown earlier, you will also get errors at compile time since if you input data of the wrong type or structure.
+
+### Option types and values
+
+The way you declare your commands and their options determines what kind of types to expect, and the `required` and `choices` properties play a special role. This is best demonstrated with an example. Consider the following command:
+
+```ts
+/* commands/_commands.ts */ 
+const commands = [
+    {
+        name: 'option-types',
+        options: [
+            { name: 'A', type: ApplicationCommandOptionType.String, required: true,
+                choices: [
+                    { name: 'foo', value: 'foo-value' },
+                    { name: 'bar', value: 'bar-value' },
+                ]
+            },
+            { name: 'B', type: ApplicationCommandOptionType.String, required: true },
+            { name: 'C', type: ApplicationCommandOptionType.String, required: false,
+                choices: [
+                    { name: 'foo', value: 'foo-value' },
+                    { name: 'bar', value: 'bar-value' },
+                ]
+            },
+            { name: 'D', type: ApplicationCommandOptionType.String, required: false },
+        ]
+    }
+] as const satisfies ReadonlyCommandList;
+```
+
+> **Note:** required is `false` by default (if omitted).
+
+| option (name) | required? | choices? |
+|:---:|:---:|:---:|
+|  A  |  ✓  |  ✓  |
+|  B  |  ✓  |  ✖  |
+|  C  |  ✖  |  ✓  |
+|  D  |  ✖  |  ✖  |
+
+A command defined as such allows us to determine what kind of value each option has at compile time:
+
+```ts
+if (isTyped.command(interaction, 'option-types')) {
+    /** 'foo-value' | 'bar-value' */
+    const a = interaction.options.get('A').value;
+    /** string */
+    const b = interaction.options.get('B').value;
+    /* 'foo-value' | 'bar-value' | undefined */
+    const c = interaction.options.get('C')?.value;
+    /* string | undefined */
+    const d = interaction.options.get('D')?.value;
+}
+```
 
 ### Use a specific command as function parameter:
 
@@ -241,18 +294,19 @@ import { TypedSubcommand } from 'discordjs-typed-commands';
 const commands = [ /* ... */ ] as const satisfies ReadonlyCommandList;
 type CoinTossSubcommand = TypedSubcommand<typeof commands, 'play', 'coin-toss'>;
 
-async function handleCoinToss(interaction: CoinTossSubcommand) { /* ... */ }
+async function handleCoinToss(interaction: CoinTossSubcommand) {
+    /* This function will only accept the "coin-toss" subcommands */
+}
 
 discord.on(Events.InteractionCreate, async interaction => {
     if (isTyped.command(interaction, 'play')) {
         /* narrow down the subcommand first */
         if (isTyped.subcommand(interaction, 'coin-toss')) {
-            await handleGreet(interaction); /* success! */
+            await handleCoinToss(interaction); /* success! */
         }
     }
 });
 ```
-
 
 > **Important**: in order to get editor autocomplete when defining a subcommand type, supply the first parameter (`typeof commands`), then leave the last two as empty strings:
 
@@ -293,7 +347,6 @@ async function handlePlay(interaction: Command['play']) {
     /* This function will only accept the "play" command */
 }
 ```
-
 
 ## FAQ
 
@@ -340,6 +393,7 @@ await writeFile('./path/to/commands.ts', output);
 - [ ] **test**: Test support for yarn and pnpm
 - [ ] **test**: Add husky hooks
 - [ ] **refactor**: Confine public exports
+- [ ] **idea**: Research on "autocomplete" and other interaction types
 
 ## Changelog
 
