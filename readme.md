@@ -2,7 +2,7 @@
 
 ## About
 
-Implements a type system that provides type-safety and intellisense and autocompletions for command names, subcommands, option types and option choices for the [discord.js library](https://github.com/discordjs/discord.js).
+Implements a type system that provides type-safety, intellisense and autocompletions for command names, subcommands, option types and option choices for the [discord.js library](https://github.com/discordjs/discord.js).
 
 ![](./assets/demo.gif)
 
@@ -10,6 +10,7 @@ Implements a type system that provides type-safety and intellisense and autocomp
 
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
+  - [Narrowing the interaction type](#narrowing-the-interaction-type)
   - [Accessing interaction options](#accessing-interaction-optionss)
   - [Commands vs subcommands](#commands-vs-subcommands)
   - [Use a specific command as function parameter](#use-a-specific-command-as-function-parameter)
@@ -48,7 +49,7 @@ export const isTyped = typed(commands);
 
 > **Important**: you must use `as const satisfies ReadonlyCommandList` when you declare your commands.
 
-Now, import `isTyped` elsewhere in your project (usually where your Discord clients is expected to receive interactions), and you're ready to go!
+Import `isTyped` anywhere you need it (usually where your Discord client is expected to receive interactions) and you're ready to go!
 
 ```ts
 /* app.ts */
@@ -70,7 +71,6 @@ discord.on(Events.InteractionCreate, async interaction => {
 ```
 
 Check out the [example directory](/example/) for a complete demo.
-
 
 ## Details
 
@@ -96,9 +96,32 @@ s = subcommand | o = option | c = choice
 
 For full code implementation of the above, check out [commands/_commands.ts](/example/commands/_commands.ts) in the example directory.
 
+### Narrowing the interaction type
+
+As seen in the example from the "Basic Usage" section, we invoke the `typed` function and supply a list of our `commands` as it's only paramater. The newly created `isTyped` function is the one that holds all the type information for our commands.
+
+```ts
+const isTyped = typed(commands);
+```
+
+When the Discord client receives an interaction, we use the `.command` method of this function to determine which one of our commands matches this interaction. It receives the `interaction` object as it's first parameter, and the name of the command as it's second.
+
+```ts
+import { isTyped } from './commands/_commands_.js';
+
+discord.on(Events.InteractionCreate, async interaction => {
+    if (isTyped.command(interaction, 'greet')) {
+        /* This is a "greet" interaction */
+    }
+});
+```
+> **Note:** Under the hood, the [command](/src/lib.ts#L43) method is just a type guard function, which builds on top of [isChatInputCommand](https://discord.js.org/#/docs/discord.js/main/class/BaseInteraction?scrollTo=isChatInputCommand) from discord.js.
+
+Similarly, there is way to check for subcommands, but more on that later.
+
 ### Accessing interaction options
 
-To access the `interaction.options.get` method, first narrow down the interaction type, then you will get editor autocomplete for all the options available to that command.
+In order to access the interaction options, narrow down the interaction type just as demonstrated in the previous section, then you can start accessing them via the `interaction.options.get` method.
 
 ```ts
 import { isTyped } from './commands/_commands_.js';
@@ -113,11 +136,7 @@ discord.on(Events.InteractionCreate, async interaction => {
 });
 ```
 
-
-
 **We access all interaction options via the `get` method only**, since this is what give us type-safety, intellisense and autocomplete. There is no need to use `getString`, `getBoolean`, `getUser` or other methods from discord.js.
-
-This works because our `commands` list from earlier is defined as an immutable array, which we then pass to the `typed` function and export as `isTyped`. This library puts all pieces of the puzzle together so TypeScript knows at compile time (when you're editing your code) what data to expect from each individual command.
 
 For example:
 
@@ -135,6 +154,8 @@ user.tag; /* string */
 const coin = interaction.options.get('choice').value;
 coin; /* 'heads' | 'tails' */
 ```
+
+> **Note:** All of this works because our `commands` list from earlier is defined as an immutable array, which we then pass to the `typed` function and export as `isTyped`. This library puts all pieces of the puzzle together so TypeScript knows at compile time (when you're editing your code) what data to expect from each individual command.
 
 ### Commands vs subcommands
 
@@ -183,22 +204,20 @@ In summary:
 - If the command has any subcommands, narrow down which subcommand the `interaction` has.
 - If the command has no subcommands, you can use `interaction.options.get('...')` directly.
 
-> **Note:** This is not something you have to actively think or worry about, since again, if you haven't narrowed down the subcommand, TypeScript will just give you an error.
+> **Note:** This is not something you have to actively think or worry about, since again, if you haven't narrowed down the subcommand, TypeScript will just give you an error or if there is no subcommand you wouldn't attempt narrowing.
 >
 > Additionally, the Discord API does not allow subcommands and options of basic type as siblings, so that makes things quite a bit easier. When you define the list of your `commands` as shown earlier, you will also get errors at compile time since if you input data of the wrong type or structure.
 
 ### Use a specific command as function parameter:
 
-You can define a specific command as a type, then use that type as a function parameter. This is useful if you want to pass down your interaction from one function to another.
+You can define a specific command as a type, then use that type as a function parameter. This is useful if you want to pass down your interaction from one function to another, and/or restrict what type of interaction the function accepts.
 
 ```ts
 /* some parts skipped for brevity */
 import { TypedCommand } from 'discordjs-typed-commands';
 
 const commands = [ /* ... */ ] as const satisfies ReadonlyCommandList;
-
 type GreetCommand = TypedCommand<typeof commands, 'greet'>;
-
 
 async function handleGreet(interaction: GreetCommand) {
     /* This function will only accept the "greet" command */
@@ -220,7 +239,6 @@ Similarly, you can do this for subcommands.
 import { TypedSubcommand } from 'discordjs-typed-commands';
 
 const commands = [ /* ... */ ] as const satisfies ReadonlyCommandList;
-
 type CoinTossSubcommand = TypedSubcommand<typeof commands, 'play', 'coin-toss'>;
 
 async function handleCoinToss(interaction: CoinTossSubcommand) { /* ... */ }
@@ -259,7 +277,6 @@ You can create a single type that holds all your `commands` via the `TypedComman
 import { TypedCommandList } from 'discordjs-typed-commands';
 
 const commands = [ /* ... */ ] as const satisfies ReadonlyCommandList;
-
 export type Command = TypedCommandList<typeof commands>;
 
 /* greet.ts */
@@ -326,7 +343,7 @@ await writeFile('./path/to/commands.ts', output);
 
 ## Changelog
 
-Changelog can be found here: https://github.com/virtuallyunknown/discordjs-typed-commands/releases
+[GitHub releases](/releases)
 
 ## License
 
