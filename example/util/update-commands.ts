@@ -1,4 +1,10 @@
 import { REST, Routes } from 'discord.js';
+
+/**
+ * 👇 when using the library, change the import paths to 'discordjs-typed-commands'
+ * 
+ * import type { ReadonlyCommandList } from 'discordjs-typed-commands'';
+ */
 import type { ReadonlyCommandList } from '../../src/index.js';
 
 export async function updateCommands(commands: ReadonlyCommandList, credentials: { token: string, clientId: string, serverId: string }) {
