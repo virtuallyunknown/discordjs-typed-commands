@@ -12,7 +12,7 @@ import type {
     BaseCommandList,
     CommandWithOptions,
     TypedCommandOptionsResolver,
-    NeverResolver,
+    TypedCommandOptionsNeverResolver,
     PickBaseCommandByName,
     ExtractCommandSubcommands,
     ExtractCommandBasicOptions,
@@ -25,7 +25,7 @@ export declare class TypedCommandOptions<
 > extends ChatInputCommandInteraction<CacheType>{
     public commandName: T['name'];
     public options: CommandHasSubcommands<CommandWithOptions<T>['options']> extends true
-        ? NeverResolver<ExtractCommandBasicOptions<CommandWithOptions<T>['options']>>
+        ? TypedCommandOptionsNeverResolver<ExtractCommandBasicOptions<CommandWithOptions<T>['options']>>
         : TypedCommandOptionsResolver<ExtractCommandBasicOptions<CommandWithOptions<T>['options']>>;
 }
 

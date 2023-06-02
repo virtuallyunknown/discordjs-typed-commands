@@ -97,7 +97,7 @@ export interface TypedCommandOptionsResolver<T extends CommandOptionBasicData> e
     get<K extends T['name']>(name: K, required?: boolean): CommandDataMapper<PickCommandOptionByName<T, K>>;
 }
 
-export interface NeverResolver<T extends CommandOptionBasicData> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getFocused'> {
+export interface TypedCommandOptionsNeverResolver<T extends CommandOptionBasicData> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getFocused'> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     get<K extends T['name']>(name: never): CommandInteractionOption<CacheType>;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
