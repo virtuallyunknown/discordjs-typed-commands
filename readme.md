@@ -10,7 +10,8 @@ Implements a type system that provides type-safety and intellisense for command 
 
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
-  - [Accessing interaction options](#accessing-interaction-options)
+  - [Accessing interaction options](#accessing-interaction-optionss)
+  - [Commands vs subcommands](#commands-vs-subcommands)
   - [Use a specific command as function parameter](#use-a-specific-command-as-function-parameter)
   - [Use a specific subcommand as function parameter](#use-a-specific-subcommand-as-function-parameter)
 - [Details](#details)
@@ -23,36 +24,33 @@ Implements a type system that provides type-safety and intellisense for command 
 Install the package via npm:
 
 ```bash
-# npm
 npm install discordjs-typed-commands
 ```
 
 ## Basic usage
 
-Create a file where you define your `commands`. The `typed` function takes the command array as it's only parameter and returns a typed version of it, providing type safety and autocompletion for command interactions. Export it and use it elsewhere in your codebase.
+In your project, create a file where you define your commands and import `typed` and `ReadonlyCommandList` from the library. Declare your `commands` then pass that array to the `typed` function and export it for usage elsewhere in your project.
 
-**Important**: you must use `as const satisfies ReadonlyCommandList` for your `commands` array.
 
 ```ts
 /* commands/_commands.ts */ 
 
 import { typed } from 'discordjs-typed-commands';
-import type { ReadonlyCommandList, TypedCommandList } from 'discordjs-typed-commands';
+import type { ReadonlyCommandList } from 'discordjs-typed-commands';
 
 export const commands = [
     /* your command list goes here */
 ] as const satisfies ReadonlyCommandList;
 
 export const isTyped = typed(commands);
-export type Commands = TypedCommandList<typeof commands>;
 ```
 
-**Note:**: you can name the function and the type in any way you want, don't have to use `isTyped` or `Commands`.
+> **Important**: you must use `as const satisfies ReadonlyCommandList` when you declare your commands.
 
-Import `isTyped` elsewhere in your project and use it down to narrow down your interactions:
+Now, import `isTyped` elsewhere in your project (usually where your Discord clients is expected to receive interactions), and you're ready to go!
 
 ```ts
-// app.ts
+/* app.ts */
 
 import { isTyped } from './commands/_commands_.js';
 
@@ -71,11 +69,12 @@ discord.on(Events.InteractionCreate, async interaction => {
 });
 ```
 
-Also check out [the example directory](/example/).
+Check out the [example directory](/example/) for a complete demo.
+
 
 ## Details
 
-The examples demonstrated below will assume you have a command list (`commands`) with the following structure:
+The examples demonstrated in this section will assume you have a command list (`commands`) with the following structure:
 
 ```
 commands
@@ -95,68 +94,11 @@ commands
 s = subcommand | o = option | c = choice
 ```
 
-Defined like this:
-
-**Important:** Do not copy paste commands from the code below as they are shortened for brevity. Full working demo is available at the [example directory](/example/commands/_commands.ts) if you need one.
-
-```ts
-/*
-* commands/_commands.ts
-* some parts skipped for brevity
-*/
-export const commands = [
-    {
-        name: 'greet',
-        description: 'Greet a user.',
-        options: [
-            {
-                name: 'user',
-                type: ApplicationCommandOptionType.User,
-            }
-        ]
-    },
-    {
-        name: 'play',
-        description: 'Play a game.',
-        options: [
-            {
-                name: 'coin-toss',
-                type: ApplicationCommandOptionType.Subcommand,
-                options: [
-                    {
-                        name: 'coin',
-                        type: ApplicationCommandOptionType.String,
-                        choices: [
-                            { name: 'heads', value: 'heads' },
-                            { name: 'tails', value: 'tails' },
-                        ]
-                    }
-                ]
-            },
-            {
-                name: 'rock-paper-scissors',
-                type: ApplicationCommandOptionType.Subcommand,
-                options: [
-                    {
-                        name: 'hand',
-                        type: ApplicationCommandOptionType.String,
-                        choices: [
-                            { name: 'rock', value: 'rock' },
-                            { name: 'paper', value: 'paper' },
-                            { name: 'scissors', value: 'scissors' },
-                        ]
-                    }
-                ]
-            },
-
-        ]
-    }
-] as const satisfies ReadonlyCommandList;
-```
+For full code implementation of the above, check out [commands/_commands.ts](/example/commands/_commands.ts) in the example directory.
 
 ### Accessing interaction options
 
-To access the `interaction.options.get` method, first narrow down the interaction type, and then you will get editor autocomplete for all the options available for that command.
+To access the `interaction.options.get` method, first narrow down the interaction type, then you will get editor autocomplete for all the options available to that command.
 
 ```ts
 import { isTyped } from './commands/_commands_.js';
@@ -169,9 +111,9 @@ discord.on(Events.InteractionCreate, async interaction => {
 });
 ```
 
-All `interaction.options` are accessed via the `get` method, so there is no need to use `getString`, `getBoolean`, `getUser` or other similar methods.
+**We access all interaction options via the `get` method only**, since this is what give us type-safety, intellisense and autocomplete. There is no need to use `getString`, `getBoolean`, `getUser` or other methods from discord.js.
 
-This is because our `command` list above is defined as an immutable array, so Typescript will be able to determine at compile time what kind of data structure each option has.
+This works because our `commands` list from earlier is defined as an immutable array, which we then pass to the `typed` function and export as `isTyped`. This library puts all pieces of the puzzle together so TypeScript knows at compile time (when you're editing your code) what data to expect from each individual command.
 
 For example:
 
@@ -190,7 +132,9 @@ const coin = interaction.options.get('choice').value;
 coin; /* 'heads' | 'tails' */
 ```
 
-**Important**: You will notice that if you narrow down the interaction to `play` and try to access it's options, Typescript you will give you an error:
+### Commands vs subcommands
+
+You will notice that if you narrow down the interaction to `play` and try to access it's options, Typescript you will give you an error:
 
 ```ts
 discord.on(Events.InteractionCreate, async interaction => {
@@ -203,7 +147,7 @@ discord.on(Events.InteractionCreate, async interaction => {
 
 This is because our first command `greet` has no subcommands, so we are able to access it's options directly. But the `play` command has two subcommands, `coin-toss` and `rock-paper-scissors`, and so far we haven't done any checks to determine which type of subcommand our `interaction` holds.
 
-Technically this piece of code probably won't crash your application, but it wouldn't make sense to try and access the `coin` option if our interaction subcommand is `rock-paper-scissors`. Likewise, it wouldn't make sense to access the `hand` option if the subcommand is `coin-toss`, it's always going to return `null` in both cases.
+Technically this piece of code probably won't crash your application, but it wouldn't make sense to try and access the `coin` option if our interaction subcommand is `rock-paper-scissors`. Likewise, it wouldn't make sense to access the `hand` option if the subcommand is `coin-toss`, in runtime it's always going to return `null` in both cases.
 
 The solution is really simple, if your command has subcommands, narrow down the subcommand first:
 
@@ -287,7 +231,7 @@ discord.on(Events.InteractionCreate, async interaction => {
 });
 ```
 
-**Important**: in order to get editor autocomplete when defining a subcommand, supply the first parameter (`typeof commands`), then leave the last two as empty strings:
+> **Important**: in order to get editor autocomplete when defining a subcommand, supply the first parameter (`typeof commands`), then leave the last two as empty strings:
 
 ```ts
 /* Define like this first: */
