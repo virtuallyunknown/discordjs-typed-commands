@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "NodeNext",
+        "target": "esnext",
+
+        "forceConsistentCasingInFileNames": true,
+        "allowUnreachableCode": true,
+
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": false,
+
+        "strict": true,
+        "declaration": true,
+        "noEmit": false,
+        "preserveWatchOutput": true,
+        "outDir": "./dist/"
+    },
+    "include": ["./src/"],
+    "exclude": ["**/node_modules", "**/.*/"]
+}

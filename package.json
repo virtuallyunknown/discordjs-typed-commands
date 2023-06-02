@@ -1,0 +1,58 @@
+{
+    "name": "discordjs-typed-commands",
+    "version": "0.0.0",
+    "type": "module",
+    "author": {
+        "name": "virtuallyunknown",
+        "url": "https://github.com/virtuallyunknown"
+    },
+    "description": "Type safe commands for discord.js",
+    "license": "MIT",
+    "keywords": [
+        "typescript",
+        "types",
+        "discord",
+        "discord.js",
+        "nodejs"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/virtuallyunknown/discordjs-typed-commands.git"
+    },
+    "files": [
+        "./src/"
+    ],
+    "exports": {
+        "types": "./src/index.ts",
+        "import": "./dist/index.js"
+    },
+    "scripts": {
+        "build": "rimraf ./dist && npx tsc",
+        "test": "npx tsc --project ./test/tsconfig.json",
+        "lint": "npx eslint --max-warnings 0 {src,example}/**",
+        "prepare": "npx rimraf dist && npx tsc",
+        "release": "release-it"
+    },
+    "release-it": {
+        "git": {
+            "requireBranch": "master",
+            "commitMessage": "chore: release v${version}",
+            "changelog": "git log --first-parent --pretty=format:\"* %s (%h)\" ${from}...${to} | sort"
+        },
+        "github": {
+            "release": true,
+            "host": "github.com"
+        },
+        "verbose": 2
+    },
+    "dependencies": {
+        "discord.js": "^14.11.0"
+    },
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^5.59.8",
+        "@typescript-eslint/parser": "^5.59.8",
+        "expect-type": "^0.16.0",
+        "rimraf": "^5.0.1",
+        "typescript": "5.0.4"
+    }
+}
