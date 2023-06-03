@@ -397,7 +397,7 @@ await writeFile('./path/to/commands.ts', output);
 
 ## Changelog
 
-[GitHub releases](/releases)
+[GitHub releases](https://github.com/virtuallyunknown/discordjs-typed-commands/releases)
 
 ## License
 
