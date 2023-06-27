@@ -11,6 +11,9 @@ import type {
     CommandOptionBasicDataType,
     CommandOptionChoiceDataType,
     PickCommandOptionByName,
+    AutocompleteCommands,
+    ExtractAutocompleteOption,
+    CommandOptionAutocompleteData
 } from './index.js';
 
 type BaseData<T extends CommandOptionBasicData> = { name: T['name'], type: T['type'] };
@@ -91,6 +94,23 @@ type CommandDataMapper<T extends CommandOptionBasicData> =
     : T['type'] extends ApplicationCommandOptionType.SubcommandGroup ? BaseData<T>
     : never;
 
+/**
+ * @note T extends T does not work here.
+ */
+type AutocompleteFocusedMapper<T extends CommandOptionAutocompleteData> = T extends any ? {
+    name: T['name'];
+    type: T['type'];
+    value: string;
+    focused: true;
+} : never;
+
+type AutocompleteDataMapper<T extends CommandOptionBasicData> = {
+    name: T['name'];
+    type: T['type'];
+    value: string;
+    focused?: true;
+};
+
 export interface TypedCommandOptionsResolver<T extends CommandOptionBasicData> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getFocused'> {
     get<K extends T['name']>(name: K): NullableData<PickCommandOptionByName<T, K>>;
     get<K extends T['name']>(name: K, required: true): CommandDataMapper<PickCommandOptionByName<T, K>>;
@@ -98,10 +118,23 @@ export interface TypedCommandOptionsResolver<T extends CommandOptionBasicData> e
 }
 
 export interface TypedCommandOptionsNeverResolver<T extends CommandOptionBasicData> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getFocused'> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    get<K extends T['name']>(name: never): CommandInteractionOption<CacheType>;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    get<K extends T['name']>(name: never, required: never): CommandInteractionOption<CacheType>;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    get<K extends T['name']>(name: never, required?: never): CommandInteractionOption<CacheType>;
+    get<K extends T['name']>(name: never): NullableData<PickCommandOptionByName<T, K>>;
+    get<K extends T['name']>(name: never, required: never): CommandDataMapper<PickCommandOptionByName<T, K>>;
+    get<K extends T['name']>(name: never, required?: never): CommandDataMapper<PickCommandOptionByName<T, K>>;
+}
+
+export interface TypedAutocompleteOptionsResolver<T extends CommandOptionBasicData> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getUser' | 'getAttachment' | 'getChannel' | 'getMember' | 'getMentionable' | 'getRole'> {
+    get<K extends T['name']>(name: K): AutocompleteDataMapper<PickCommandOptionByName<T, K>> | null;
+    get<K extends T['name']>(name: K, required: true): AutocompleteDataMapper<PickCommandOptionByName<T, K>>;
+    get<K extends T['name']>(name: K, required?: boolean): AutocompleteDataMapper<PickCommandOptionByName<T, K>> | null;
+    getFocused(getFull: true): AutocompleteFocusedMapper<ExtractAutocompleteOption<T>>;
+    getFocused(getFull?: boolean): string;
+}
+
+export interface TypedAutocompleteOptionsNeverResolver<T extends CommandOptionBasicData> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getUser' | 'getAttachment' | 'getChannel' | 'getMember' | 'getMentionable' | 'getRole'> {
+    get<K extends T['name']>(name: never): AutocompleteDataMapper<PickCommandOptionByName<T, K>> | null;
+    get<K extends T['name']>(name: never, required: never): AutocompleteDataMapper<PickCommandOptionByName<T, K>>;
+    get<K extends T['name']>(name: never, required?: never): AutocompleteDataMapper<PickCommandOptionByName<T, K>> | null;
+    getFocused(getFull: never): AutocompleteFocusedMapper<ExtractAutocompleteOption<T>>;
+    getFocused(getFull?: never): string;
 }

@@ -4,10 +4,22 @@ import type {
     BaseCommand,
     BaseCommandList,
     CommandOptionAnyData,
+    CommandOptionAutocompleteData,
     CommandOptionBasicData,
     CommandOptionSubcommandData,
+    CommandOptionSubcommandOrGroupData,
+    TypedAutocompleteCommand,
     TypedCommand
 } from './index.js';
+
+/**
+ * For dev/debugging purposes
+ * @see https://stackoverflow.com/a/57683652/3258251
+ */
+export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
+export type ExpandRecursively<T> = T extends object
+    ? T extends infer O ? { [K in keyof O]: ExpandRecursively<O[K]> } : never
+    : T;
 
 /**
  * Deeply nested immutable (readonly) array object remapper:
@@ -27,6 +39,10 @@ export type ReadonlyCommandList = ImmutableArray<ChatInputApplicationCommandData
 
 export type TypedCommandList<T extends BaseCommandList> = {
     [K in T[number]['name']]: TypedCommand<T, K>
+};
+
+export type TypedAutocompleteList<T extends BaseCommandList, A extends AutocompleteCommands<T> = AutocompleteCommands<T>> = {
+    [K in A[number]['name']]: TypedAutocompleteCommand<A, K>
 };
 
 /**
@@ -64,6 +80,8 @@ export type PickCommandOptionByName<T extends CommandOptionBasicData, K extends 
     : never;
 
 type ExtractBasicOption<T extends CommandOptionAnyData> = T extends CommandOptionBasicData ? T : never;
+export type ExtractAutocompleteOption<T extends CommandOptionAnyData> = T extends CommandOptionAutocompleteData ? T : never;
+
 type ExtractSubcommand<T extends CommandOptionAnyData> = T extends CommandOptionSubcommandData ? T : never;
 
 export type ExtractCommandBasicOptions<T extends ReadonlyArray<CommandOptionAnyData>> =
@@ -88,3 +106,24 @@ export type ExtractSubcommandBasicOptions<T extends ReadonlyArray<CommandOptionA
     ? ExtractSubcommandBasicOptions<Options['options'], K>
     : never
     : never;
+
+type HasAutocompleteData<T extends ReadonlyArray<CommandOptionAnyData>> = {
+    [K in keyof T]: T[K] extends { autocomplete: true } ? T[K] : never;
+} extends ReadonlyArray<never> ? false : true;
+
+type FilterNeverOptions<T> = T extends { options: ReadonlyArray<never> } ? never : T;
+
+type FilterAutocompleteOptions<T> =
+    T extends { options: ReadonlyArray<CommandOptionBasicData> }
+    ? HasAutocompleteData<T['options']> extends true
+    ? T
+    : never
+    : T extends { options: ReadonlyArray<CommandOptionAnyData> }
+    ? T extends { options: infer Options extends ReadonlyArray<CommandOptionSubcommandOrGroupData> }
+    ? FilterNeverOptions<Omit<T, 'options'> & { options: AutocompleteCommands<Options> }>
+    : never
+    : never;
+
+export type AutocompleteCommands<T extends BaseCommandList> = {
+    [K in keyof T]: FilterAutocompleteOptions<T[K]>
+};

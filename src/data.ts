@@ -45,6 +45,15 @@ type CommandOptionNumericData = Pick<ApplicationCommandNumericOption, 'name' | '
 type CommandOptionStringData = Pick<ApplicationCommandStringOption, 'name' | 'type' | 'required'> & {
     choices?: ReadonlyArray<ApplicationCommandOptionChoiceData<string>>;
 };
+
+type AutocompleteOptionNumericData = Pick<ApplicationCommandNumericOption, 'name' | 'type' | 'required'> & {
+    autocomplete: true;
+};
+
+type AutocompleteOptionStringData = Pick<ApplicationCommandStringOption, 'name' | 'type' | 'required'> & {
+    autocomplete: true;
+};
+
 type CommandOptionChannelData = Pick<ApplicationCommandChannelOption, 'name' | 'type' | 'required'>;
 type CommandOptionRoleData = Pick<ApplicationCommandRoleOption, 'name' | 'type' | 'required'>;
 type CommandOptionUserData = Pick<ApplicationCommandUserOption, 'name' | 'type' | 'required'>;
@@ -63,6 +72,8 @@ export type CommandOptionBasicData =
     | CommandOptionAttachmentOptionData;
 
 export type CommandOptionAnyData = CommandOptionBasicData | CommandOptionSubcommandData | CommandOptionSubcommandGroupData;
+export type CommandOptionAutocompleteData = AutocompleteOptionNumericData | AutocompleteOptionStringData;
+export type CommandOptionSubcommandOrGroupData = CommandOptionSubcommandData | CommandOptionSubcommandGroupData;
 
 export type CommandBaseData = Pick<ChatInputApplicationCommandData, 'name'> & {
     options?: ReadonlyArray<CommandOptionAnyData>;
