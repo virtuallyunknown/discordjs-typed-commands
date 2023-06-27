@@ -3,8 +3,8 @@ import { test } from 'node:test';
 import { expectTypeOf } from 'expect-type';
 import type { Interaction, ApplicationCommandOptionType, CommandInteractionOption } from 'discord.js';
 import type { TypedSubcommand } from '../src/index.js';
-import type { Command, commands } from './commands.test-d.js';
-import { isTyped } from './commands.test-d.js';
+import type { Command, commands } from './commands-default.test-d.js';
+import { isTyped } from './commands-default.test-d.js';
 
 type Optional<T> = T | undefined;
 type FailsafeFunction = (command: Command['0-failsafe']) => void;
@@ -25,7 +25,7 @@ test('0-failsafe', () => {
         expectTypeOf(interaction.commandName).toEqualTypeOf<'0-failsafe'>();
         /** interaction is callable with a function with params of the same TypedCommand*/
         expectTypeOf(commandFunc).toBeCallableWith(interaction);
-        /** interaction is not callable with a function with params of a different TypedCommand */
+        /** interaction.options.get is never */
         expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().toBeNever();
     }
 
@@ -33,7 +33,6 @@ test('0-failsafe', () => {
         /** interaction matches command */
         expectTypeOf(interaction).toEqualTypeOf<Command['0-failsafe']>();
     }
-
 });
 
 test('1-no-options', () => {
