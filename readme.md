@@ -348,6 +348,10 @@ async function handlePlay(interaction: Command['play']) {
 }
 ```
 
+### Autocomplete commands
+
+Version 0.2 adds support for autocomplete commands.
+
 ## FAQ
 
 Q: **Does this package support CommonJS (require)**
@@ -389,11 +393,12 @@ await writeFile('./path/to/commands.ts', output);
 ## Todo
 
 - [x] **docs**: Improve readme docs
+- [x] **feat**: Add support for autocomplete interactions
+- [ ] **docs**: Document autocomplete interactions
 - [ ] **docs**: Provide internal docs
 - [ ] **test**: Test support for yarn and pnpm
 - [ ] **test**: Add husky hooks
 - [ ] **refactor**: Confine public exports
-- [ ] **idea**: Research on "autocomplete" and other interaction types
 
 ## Changelog
 
