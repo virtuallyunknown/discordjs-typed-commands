@@ -292,6 +292,15 @@ test('7-subcommand-basic-options', () => {
         /** interaction.options.get is never */
         expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().toBeNever();
 
+        /** interaction.options.getSubcommand() narrows down properly */
+        if (
+            isTyped.subcommand(interaction, '7-subcommand-1') ||
+            isTyped.subcommand(interaction, '7-subcommand-2') ||
+            isTyped.subcommand(interaction, '7-subcommand-3-empty')
+        ) {
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'7-subcommand-1' | '7-subcommand-2' | '7-subcommand-3-empty'>();
+        }
+
         if (isTyped.subcommand(interaction, '7-subcommand-1')) {
             /** interaction matches subcommand */
             expectTypeOf(interaction).toEqualTypeOf<TypedSubcommand<typeof commands, '7-subcommand-basic-options', '7-subcommand-1'>>();
@@ -299,6 +308,8 @@ test('7-subcommand-basic-options', () => {
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().not.toBeNever();
             /** interaction.options.get is not never */
             expectTypeOf(interaction.options.get('7-sub-1-string').name).toEqualTypeOf<'7-sub-1-string'>();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'7-subcommand-1'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('7-sub-2-string');
@@ -311,6 +322,8 @@ test('7-subcommand-basic-options', () => {
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().not.toBeNever();
             /** interaction.options.get is not never */
             expectTypeOf(interaction.options.get('7-sub-2-string').name).toEqualTypeOf<'7-sub-2-string'>();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'7-subcommand-2'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('7-sub-1-string');
@@ -321,6 +334,8 @@ test('7-subcommand-basic-options', () => {
             expectTypeOf(interaction).toEqualTypeOf<TypedSubcommand<typeof commands, '7-subcommand-basic-options', '7-subcommand-3-empty'>>();
             /** interaction.options.get is never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'7-subcommand-3-empty'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('7-sub-1-string');
@@ -424,9 +439,22 @@ test('10-subgroup', () => {
         /** interaction.options.get is never */
         expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().toBeNever();
 
+        if (
+            isTyped.subcommand(interaction, '10-subgroup-1-subcommand-1') ||
+            isTyped.subcommand(interaction, '10-subgroup-1-subcommand-2') ||
+            isTyped.subcommand(interaction, '10-subgroup-2-subcommand-1') ||
+            isTyped.subcommand(interaction, '10-subgroup-2-subcommand-2') ||
+            isTyped.subcommand(interaction, '10-subgroup-4-empty-subcommand-1') ||
+            isTyped.subcommand(interaction, '10-subgroup-4-empty-subcommand-2')
+        ) {
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'10-subgroup-1-subcommand-1' | '10-subgroup-1-subcommand-2' | '10-subgroup-2-subcommand-1' | '10-subgroup-2-subcommand-2' | '10-subgroup-4-empty-subcommand-1' | '10-subgroup-4-empty-subcommand-2'>();
+        }
+
         if (isTyped.subcommand(interaction, '10-subgroup-1-subcommand-1')) {
             /** interaction.options.get is not never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().not.toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'10-subgroup-1-subcommand-1'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('10-s2-s2-integer');
@@ -435,6 +463,8 @@ test('10-subgroup', () => {
         if (isTyped.subcommand(interaction, '10-subgroup-1-subcommand-2')) {
             /** interaction.options.get is not never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().not.toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'10-subgroup-1-subcommand-2'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('10-s1-s1-integer');
@@ -443,6 +473,8 @@ test('10-subgroup', () => {
         if (isTyped.subcommand(interaction, '10-subgroup-2-subcommand-1')) {
             /** interaction.options.get is not never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().not.toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'10-subgroup-2-subcommand-1'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('10-s1-s1-integer');
@@ -451,6 +483,8 @@ test('10-subgroup', () => {
         if (isTyped.subcommand(interaction, '10-subgroup-2-subcommand-2')) {
             /** interaction.options.get is not never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().not.toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'10-subgroup-2-subcommand-2'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('10-s1-s1-integer');
@@ -459,6 +493,8 @@ test('10-subgroup', () => {
         if (isTyped.subcommand(interaction, '10-subgroup-4-empty-subcommand-1')) {
             /** interaction.options.get is never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'10-subgroup-4-empty-subcommand-1'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('10-s1-s1-integer');
@@ -467,6 +503,8 @@ test('10-subgroup', () => {
         if (isTyped.subcommand(interaction, '10-subgroup-4-empty-subcommand-2')) {
             /** interaction.options.get is never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'10-subgroup-4-empty-subcommand-2'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('10-s1-s1-integer');
@@ -492,9 +530,21 @@ test('11-subgroup-subcommand-sibling', () => {
         /** interaction matches command */
         expectTypeOf(interaction).toEqualTypeOf<Command['11-subgroup-subcommand-sibling']>();
 
+        if (
+            isTyped.subcommand(interaction, '11-subcommand-sibling') ||
+            isTyped.subcommand(interaction, '11-subcommand-sibling-empty') ||
+            isTyped.subcommand(interaction, '11-sugroup-1-subcommand-1') ||
+            isTyped.subcommand(interaction, '11-sugroup-1-subcommand-2') ||
+            isTyped.subcommand(interaction, '11-sugroup-1-subcommand-3-empty')
+        ) {
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'11-sugroup-1-subcommand-1' | '11-sugroup-1-subcommand-2' | '11-sugroup-1-subcommand-3-empty' | '11-subcommand-sibling' | '11-subcommand-sibling-empty'>();
+        }
+
         if (isTyped.subcommand(interaction, '11-sugroup-1-subcommand-1')) {
             /** interaction.options.get is not never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().not.toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'11-sugroup-1-subcommand-1'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('11-s1-s2-integer');
@@ -502,6 +552,8 @@ test('11-subgroup-subcommand-sibling', () => {
         if (isTyped.subcommand(interaction, '11-sugroup-1-subcommand-2')) {
             /** interaction.options.get is not never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().not.toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'11-sugroup-1-subcommand-2'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('11-s1-s1-integer');
@@ -509,6 +561,8 @@ test('11-subgroup-subcommand-sibling', () => {
         if (isTyped.subcommand(interaction, '11-sugroup-1-subcommand-3-empty')) {
             /** interaction.options.get is never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'11-sugroup-1-subcommand-3-empty'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('11-s1-s1-integer');
@@ -516,6 +570,8 @@ test('11-subgroup-subcommand-sibling', () => {
         if (isTyped.subcommand(interaction, '11-subcommand-sibling')) {
             /** interaction.options.get is not never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().not.toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'11-subcommand-sibling'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('11-s1-s1-integer');
@@ -524,6 +580,8 @@ test('11-subgroup-subcommand-sibling', () => {
         if (isTyped.subcommand(interaction, '11-subcommand-sibling-empty')) {
             /** interaction.options.get is never */
             expectTypeOf<Parameters<typeof interaction['options']['get']>[0]>().toBeNever();
+            /** interaction.options.getSubcommand() narrows down properly */
+            expectTypeOf(interaction.options.getSubcommand()).toEqualTypeOf<'11-subcommand-sibling-empty'>();
             /** interaction.options.get can't access sibling options */
             /** @ts-expect-error */
             interaction.options.get('11-s1-s1-integer');
