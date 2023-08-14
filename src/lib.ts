@@ -39,7 +39,7 @@ export declare class TypedCommandSubcommandOptions<
 > extends ChatInputCommandInteraction<CacheType> {
     private subcommandName: K;
     public commandName: T['name'];
-    public options: TypedCommandOptionsResolver<ExtractSubcommandBasicOptions<CommandWithOptions<T>['options'], K>>;
+    public options: TypedCommandOptionsResolver<ExtractSubcommandBasicOptions<CommandWithOptions<T>['options'], K>, K>;
 }
 
 export declare class TypedAutocompleteCommandOptions<
@@ -57,7 +57,7 @@ export declare class TypedAutocompleteSubcommandOptions<
 > extends AutocompleteInteraction<CacheType> {
     private subcommandName: K;
     public commandName: T['name'];
-    public options: TypedAutocompleteOptionsResolver<ExtractSubcommandBasicOptions<CommandWithOptions<T>['options'], K>>;
+    public options: TypedAutocompleteOptionsResolver<ExtractSubcommandBasicOptions<CommandWithOptions<T>['options'], K>, K>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

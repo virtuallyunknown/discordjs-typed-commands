@@ -111,10 +111,12 @@ type AutocompleteDataMapper<T extends CommandOptionBasicData> = {
     focused?: true;
 };
 
-export interface TypedCommandOptionsResolver<T extends CommandOptionBasicData> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getFocused'> {
+export interface TypedCommandOptionsResolver<T extends CommandOptionBasicData, S extends string = string> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getFocused'> {
     get<K extends T['name']>(name: K): NullableData<PickCommandOptionByName<T, K>>;
     get<K extends T['name']>(name: K, required: true): CommandDataMapper<PickCommandOptionByName<T, K>>;
     get<K extends T['name']>(name: K, required?: boolean): CommandDataMapper<PickCommandOptionByName<T, K>>;
+    getSubcommand(required?: true): S;
+    getSubcommand(required: boolean): S | null;
 }
 
 export interface TypedCommandOptionsNeverResolver<T extends CommandOptionBasicData> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getFocused'> {
@@ -123,10 +125,12 @@ export interface TypedCommandOptionsNeverResolver<T extends CommandOptionBasicDa
     get<K extends T['name']>(name: never, required?: never): CommandDataMapper<PickCommandOptionByName<T, K>>;
 }
 
-export interface TypedAutocompleteOptionsResolver<T extends CommandOptionBasicData> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getUser' | 'getAttachment' | 'getChannel' | 'getMember' | 'getMentionable' | 'getRole'> {
+export interface TypedAutocompleteOptionsResolver<T extends CommandOptionBasicData, S extends string = string> extends Omit<CommandInteractionOptionResolver<CacheType>, 'getMessage' | 'getUser' | 'getAttachment' | 'getChannel' | 'getMember' | 'getMentionable' | 'getRole'> {
     get<K extends T['name']>(name: K): AutocompleteDataMapper<PickCommandOptionByName<T, K>> | null;
     get<K extends T['name']>(name: K, required: true): AutocompleteDataMapper<PickCommandOptionByName<T, K>>;
     get<K extends T['name']>(name: K, required?: boolean): AutocompleteDataMapper<PickCommandOptionByName<T, K>> | null;
+    getSubcommand(required?: true): S;
+    getSubcommand(required: boolean): S | null;
     getFocused(getFull: true): AutocompleteFocusedMapper<ExtractAutocompleteOption<T>>;
     getFocused(getFull?: boolean): string;
 }
