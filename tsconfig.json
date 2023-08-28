@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
-        "module": "esnext",
+        "module": "NodeNext",
         "moduleResolution": "NodeNext",
-        "target": "esnext",
+        "target": "ESNext",
 
         "forceConsistentCasingInFileNames": true,
         "allowUnreachableCode": true,
